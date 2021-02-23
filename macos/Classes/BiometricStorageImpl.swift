@@ -147,18 +147,22 @@ class BiometricStorageImpl {
     
     if (initOptions.authenticationRequired) {
       let context = LAContext()
+      // context.invalidate()
         if #available(OSX 10.12, *) {
             context.touchIDAuthenticationAllowableReuseDuration = Double(initOptions.authenticationValidityDurationSeconds)
         } else {
             // Fallback on earlier versions
             hpdebug("Pre OSX 10.12 no touchIDAuthenticationAllowableReuseDuration available. ignoring.")
         }
+      // access of SecItemCopyMatching (i.e. read) is defined and ruled by AccessControl Rule at SecItemAdd (i.e. write)
       let access = SecAccessControlCreateWithFlags(nil, // Use the default allocator.
         kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly,
-        .userPresence,
+        // .userPresence, // auth access with either bio or passcode fallback is still ok; LAPolicy.deviceOwnerAuthentication
+        .touchIDAny, // auth access with bio only; LAPolicy.deviceOwnerAuthenticationWithBiometrics
         nil) // Ignore any error.
       query.merge([
         kSecUseAuthenticationContext as String: context,
+        // kSecUseAuthenticationContext as String: LAContext(),
         kSecAttrAccessControl as String: access as Any,
         kSecUseOperationPrompt as String: "Unlock to save data",
       ]) { (_, new) in new }
@@ -205,7 +209,9 @@ class BiometricStorageImpl {
       context.localizedCancelTitle = "Checking auth support"
     }
     var error: NSError?
-    if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
+    // if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
+    if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
+      // context.invalidate()
       result("Success")
       return
     }
