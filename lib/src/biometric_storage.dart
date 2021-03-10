@@ -371,5 +371,5 @@ class BiometricStorageFile {
       _plugin.write(name, content, androidPromptInfo);
 
   /// Delete the content of this storage.
-  Future<void> delete() => _plugin.delete(name, androidPromptInfo);
+  Future<bool> delete() => _plugin.delete(name, androidPromptInfo);
 }
