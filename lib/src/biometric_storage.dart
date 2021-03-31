@@ -265,7 +265,7 @@ class MethodChannelBiometricStorage extends BiometricStorage {
       final result = await _channel.invokeMethod<bool>(
         'init',
         {
-          'name': name,
+          'name': Platform.isAndroid ? Uri.encodeComponent(name) : name,
           'options': options?.toJson() ?? StorageFileInitOptions().toJson(),
           'forceInit': forceInit,
         },
@@ -273,7 +273,7 @@ class MethodChannelBiometricStorage extends BiometricStorage {
       _logger.finest('getting storage. was created: $result');
       return BiometricStorageFile(
         this,
-        name,
+        Platform.isAndroid ? Uri.encodeComponent(name) : name,
         androidPromptInfo,
       );
     } catch (e, stackTrace) {
