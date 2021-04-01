@@ -190,7 +190,7 @@ class BiometricStoragePlugin : FlutterPlugin, ActivityAware, MethodCallHandler {
                     result.success(true)
                 } ?: throw MethodCallException("NoSuchStorage", "Tried to dispose non existing storage.", null)
                 "read" -> withStorage { if (exists()) { withAuth { result.success(readFile(applicationContext)) } } else { result.success(null) } }
-                "delete" -> withStorage { if (exists()) { withAuth { result.success(deleteFile()) } } else { result.success(false) } }
+                "delete" -> withStorage { if (exists()) { result.success(deleteFile()) } else { result.success(false) } }
                 "write" -> withStorage { withAuth {
                     writeFile(applicationContext, requiredArgument(PARAM_WRITE_CONTENT))
                     result.success(true)
